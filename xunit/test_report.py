@@ -1,4 +1,4 @@
-class TestResult:
+class TestReport:
     def __init__(self) -> None:
         self.__details = {}
         self.run_count = 0

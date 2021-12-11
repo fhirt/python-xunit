@@ -7,7 +7,7 @@ class WasRun(xunit.TestCase):
     def setup(self):
         self.log = "setup "
 
-    def test_method(self):
+    def should_run_test_method(self):
         self.log = self.log + "test_method "
 
     def tear_down(self):
@@ -28,41 +28,41 @@ class RaiseSetupException(WasRun):
 class TestCaseTest(xunit.TestCase):
     
     def setup(self):
-        self.result = xunit.TestResult()    
+        self.result = xunit.TestReport()    
     
     def test_template_method(self):
-        test = WasRun("test_method")
+        test = WasRun("should_run_test_method")
         test.run(self.result)
         assert(test.log == "setup test_method tear_down")
 
-    def test_result(self):
-        test = WasRun("test_method")
+    def should_report_success(self):
+        test = WasRun("should_run_test_method")
         test.run(self.result)
         assert(self.result.summary() == "1 run, 0 failed")
 
-    def test_failed_result(self):
+    def should_report_failure(self):
         broken_test = WasRun("test_broken_method")
         broken_test.run(self.result)
         assert(self.result.summary() == "1 run, 1 failed")
         
-    def test_failed_result_formatting(self):
+    def should_return_formatted_summary_report(self):
         self.result.test_started()
         self.result.test_failed("test", "some reason")
         assert(self.result.summary() == "1 run, 1 failed")
         
-    def test_should_handle_setup_exception(self):
-        test = RaiseSetupException("test_method")
+    def should_handle_setup_exception(self):
+        test = RaiseSetupException("should_run_test_method")
         test.run(self.result)
         assert(self.result.summary() == "1 run, 1 failed")
 
     def test_suite(self):
         suite = xunit.TestSuite()
-        suite.add(WasRun("test_method"))
+        suite.add(WasRun("should_run_test_method"))
         suite.add(WasRun("test_broken_method"))
         suite.run(self.result)
         assert("2 run, 1 failed" == self.result.summary())
         
-    def test_result_details(self):
+    def should_report_test_details(self):
         self.result.test_started()
         self.result.test_failed("test_1", "reason 1")
         self.result.test_started()
@@ -71,12 +71,13 @@ class TestCaseTest(xunit.TestCase):
         assert(self.result.summary() == "3 run, 2 failed")
         assert(self.result.details() == { "test_1": "reason 1", "test_3": "reason 2"})
         
-    def test_should_create_suite_from_test_case(self):
+    def should_create_suite_from_defined_test_cases_(self):
         suite = WasRun.create_test_suite()
         assert(suite.number_of_tests() == 2)
         
+        
 suite = TestCaseTest.create_test_suite()
-result = xunit.TestResult()       
+result = xunit.TestReport()       
 suite.run(result)
 
 print(result.summary())

@@ -1,5 +1,5 @@
 import inspect
-from .test_report import TestResult
+from .test_report import TestReport
 
 class TestCase:
     def __init__(self, name) -> None:
@@ -10,17 +10,17 @@ class TestCase:
         optional setup before each test method
         """       
 
-    def run(self, test_result: TestResult) -> None:
-        test_result.test_started()
+    def run(self, test_report: TestReport) -> None:
+        test_report.test_started()
         try:
             self.setup()
             try:
                 method = getattr(self, self.name)
                 method()
             except AssertionError as ae:
-                test_result.test_failed(self.name, ae)
+                test_report.test_failed(self.name, ae)
         except Exception as e:
-            test_result.test_failed(self.name, e)
+            test_report.test_failed(self.name, e)
         finally:
             self.tear_down()        
 
@@ -33,7 +33,7 @@ class TestCase:
     def create_test_suite(cls) -> "TestSuite":
         test_suite = TestSuite()
         for member in inspect.getmembers(cls):
-            if inspect.isfunction(member[1]) and member[0].startswith("test_"):
+            if inspect.isfunction(member[1]) and (member[0].startswith("test_") or member[0].startswith("should_")):
                 test_suite.add(cls(member[0]))
         return test_suite
 
@@ -47,6 +47,6 @@ class TestSuite(TestCase):
     def number_of_tests(self) -> int:
         return len(self.__tests)
         
-    def run(self, test_result: TestResult):
+    def run(self, test_report: TestReport):
         for test in self.__tests:
-            test.run(test_result)
+            test.run(test_report)
