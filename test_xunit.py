@@ -88,6 +88,9 @@ class TestCaseTest(xunit.TestCase):
         assert(test_result.failed() == True)
         assert(test_result.reason() == "reason")
         
+    def should_collect_test_results(self):
+        pass
+        
 suite = TestCaseTest.create_test_suite()
 result = xunit.TestReporter()       
 suite.run(result)
