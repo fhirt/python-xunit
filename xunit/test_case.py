@@ -3,7 +3,7 @@ from xunit.report import Report, TestResult
 
 class TestCase:
     def __init__(self, name) -> None:
-        self.name = name
+        self.__name = name
 
     def setup(self):
         """
@@ -11,11 +11,11 @@ class TestCase:
         """       
 
     def run(self, test_reporter: Report) -> None:
-        test_result = TestResult(self.name)
+        test_result = TestResult(self)
         try:
             self.setup()
             try:
-                method = getattr(self, self.name)
+                method = getattr(self, self.__name)
                 method()
             except AssertionError as ae:
                 test_result.record_failure(ae)
@@ -24,6 +24,9 @@ class TestCase:
         finally:
             test_reporter.record_test_result(test_result)
             self.tear_down()        
+
+    def name(self) -> str:
+        return self.__name
 
     def tear_down(self):
         """

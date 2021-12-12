@@ -8,7 +8,7 @@ class MockTestCase(xunit.TestCase):
     def setup(self):
         self.log = "setup "
 
-    def should_run_test_method(self):
+    def should_run_successfull_test(self):
         self.log = self.log + "test_method "
 
     def tear_down(self):
@@ -33,12 +33,12 @@ class TestCaseTest(xunit.TestCase):
         self.test_report = xunit.Report()
 
     def should_run_setup_test_case_and_teardown(self):
-        test = MockTestCase("should_run_test_method")
+        test = MockTestCase("should_run_successfull_test")
         test.run(self.test_report)
         assert test.log == "setup test_method tear_down", f"should run all TestCase methods but was: {test.log}"
 
     def should_report_success(self):
-        test = MockTestCase("should_run_test_method")
+        test = MockTestCase("should_run_successfull_test")
         test.run(self.test_report)
         assert self.test_report.run_count() == 1
         assert self.test_report.failure_count() == 0
@@ -50,14 +50,13 @@ class TestCaseTest(xunit.TestCase):
         assert self.test_report.failure_count() == 1
 
     def should_run_teardown_after_setup_exception(self):
-        test = MockTestCaseWithSetupException("should_run_test_method")
+        test = MockTestCaseWithSetupException("should_run_successfull_test")
         test.run(self.test_report)
         assert test.log == "setup tear_down", f"should run tear_down: {test.log}"
 
 
 suite = TestCaseTest.create_test_suite()
 test_report = xunit.Report()
-test_report.test_suite("TestCaseTest")
 suite.run(test_report)
 print(xunit.ReportFormatter.format(test_report))
 
@@ -67,7 +66,7 @@ class TestSuiteTest(xunit.TestCase):
         
     def should_run_all_test_cases_in_test_suite(self):
         suite = xunit.TestSuite()
-        suite.add(MockTestCase("should_run_test_method"))
+        suite.add(MockTestCase("should_run_successfull_test"))
         suite.add(MockTestCase("test_broken_method"))
         suite.run(self.test_report)
         assert "2 run, 1 failed" == self.test_report.summary(), f"should print correct summary but was: {self.test_report.summary()}"
@@ -79,8 +78,8 @@ class TestSuiteTest(xunit.TestCase):
     def should_record_failure_reason(self):
         suite = MockTestCase.create_test_suite()
         suite.run(self.test_report)
-        test_results = self.test_report.test_results()
-        assert len(test_results) == 2, f"should be 2, but was: {len(test_results)}"
+        test_results = self.test_report.test_results()["MockTestCase"]
+        assert self.test_report.run_count() == 2, f"should be 2, but was: {self.test_report.run_count()}"
         assert self.test_report.failure_count() == 1, f"should be 1, but was: {self.test_report.failure_count()}"
         failing_test = None
         for test_result in test_results:
@@ -90,44 +89,47 @@ class TestSuiteTest(xunit.TestCase):
         
 suite = TestSuiteTest.create_test_suite()
 test_report = xunit.Report()
-test_report.test_suite("TestSuiteTest")
 suite.run(test_report)
 print(xunit.ReportFormatter.format(test_report))
 
-class TestReportTest(xunit.TestCase):
+class TestReportTest(xunit.TestCase):   
+    
+    def should_record_test_case_name(self):
+        test_result = xunit.TestResult(MockTestCase("should_run_successful_test"))
+        assert test_result.test_case() == "MockTestCase"
+    
     def should_record_successful_test(self):
-        test_result = xunit.TestResult("successful_test")
-        assert test_result.test_name() == "successful_test"
+        test_result = xunit.TestResult(MockTestCase("should_run_successful_test"))
+        
+        assert test_result.test_name() == "should_run_successful_test"
         assert test_result.failed() == False
         assert test_result.reason() == None
 
     def should_record_failure_reason_for_unsuccessful_test(self):
-        test_result = xunit.TestResult("failing_test")
+        test_result = xunit.TestResult(MockTestCase("test_broken_method"))
         test_result.record_failure("reason")
-        assert test_result.test_name() == "failing_test", "should be failing_test, but was:"
+        assert test_result.test_name() == "test_broken_method", "should be failing_test, but was:"
         assert test_result.failed() == True, "should be True, but was:"
         assert test_result.reason() == "reason", "should record reason, but was:"
 
     def should_format_test_report(self):
         test_report = xunit.Report()
-        test_report.test_suite("TestSuiteName")
-        test_result_one = xunit.TestResult("test_1")
+        test_result_one = xunit.TestResult(MockTestCase("test_broken_method"))
         test_result_one.record_failure("failure reason")
         test_report.record_test_result(test_result_one)
 
-        test_result_two = xunit.TestResult("test_2")
+        test_result_two = xunit.TestResult(MockTestCase("should_run_successful_test"))
         test_report.record_test_result(test_result_two)
 
         assert test_report.summary() == "2 run, 1 failed", f"should display summary, but was: '{test_report.summary()}'"
         formatted_report = xunit.ReportFormatter.format(test_report)
-        assert "TestSuiteName" in formatted_report, "should contain 'TestSuiteName'"
-        assert "test_1" in formatted_report, "should report failing test"
-        assert "test_2" in formatted_report, "should report successful test"
+        assert "MockTestCase" in formatted_report, "should contain 'MockTestCase'"
+        assert "test_broken_method" in formatted_report, "should report failing test"
+        assert "should_run_successful_test" in formatted_report, "should report successful test"
         assert "failure reason" in formatted_report, "should report failure reason"
 
 suite = TestReportTest.create_test_suite()
 test_report = xunit.Report()
-test_report.test_suite("TestReportTest")
 suite.run(test_report)
 print(xunit.ReportFormatter.format(test_report))
 
@@ -142,6 +144,5 @@ class RunnerTest(xunit.TestCase):
         
 suite = RunnerTest.create_test_suite()
 test_report = xunit.Report()
-test_report.test_suite("RunnerTest")
 suite.run(test_report)
 print(xunit.ReportFormatter.format(test_report))
