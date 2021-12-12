@@ -130,3 +130,18 @@ test_report = xunit.TestReport()
 test_report.test_suite("TestReportTest")
 suite.run(test_report)
 print(xunit.TestReportFormatter.format(test_report))
+
+class RunnerTest(xunit.TestCase):
+    def should_setup_and_run_specified_test_suites(self):
+        mock_suite_one = MockTestCase.create_test_suite()
+        mock_suite_two = MockTestCaseWithSetupException.create_test_suite()
+        
+        runner = xunit.Runner()
+        runner.add(mock_suite_one, mock_suite_two)
+        runner.run()
+        
+suite = RunnerTest.create_test_suite()
+test_report = xunit.TestReport()
+test_report.test_suite("RunnerTest")
+suite.run(test_report)
+print(xunit.TestReportFormatter.format(test_report))
