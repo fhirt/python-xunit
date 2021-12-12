@@ -58,7 +58,7 @@ class TestCaseTest(xunit.TestCase):
 suite = TestCaseTest.create_test_suite()
 test_report = xunit.Report()
 suite.run(test_report)
-print(xunit.ReportFormatter.format(test_report))
+print(xunit.DefaultFormatter.format(test_report))
 
 class TestSuiteTest(xunit.TestCase):
     def setup(self):
@@ -69,7 +69,8 @@ class TestSuiteTest(xunit.TestCase):
         suite.add(MockTestCase("should_run_successfull_test"))
         suite.add(MockTestCase("test_broken_method"))
         suite.run(self.test_report)
-        assert "2 run, 1 failed" == self.test_report.summary(), f"should print correct summary but was: {self.test_report.summary()}"
+        assert self.test_report.run_count() == 2, f"should be 2, but was: {self.test_report.run_count()}"
+        assert self.test_report.failure_count() == 1, f"should be 1, but was: {self.test_report.failure_count()}"
 
     def should_add_test_cases_starting_with_should_and_test(self):
         suite = MockTestCase.create_test_suite()
@@ -90,7 +91,7 @@ class TestSuiteTest(xunit.TestCase):
 suite = TestSuiteTest.create_test_suite()
 test_report = xunit.Report()
 suite.run(test_report)
-print(xunit.ReportFormatter.format(test_report))
+print(xunit.DefaultFormatter.format(test_report))
 
 class TestReportTest(xunit.TestCase):   
     
@@ -121,8 +122,9 @@ class TestReportTest(xunit.TestCase):
         test_result_two = xunit.TestResult(MockTestCase("should_run_successful_test"))
         test_report.record_test_result(test_result_two)
 
-        assert test_report.summary() == "2 run, 1 failed", f"should display summary, but was: '{test_report.summary()}'"
-        formatted_report = xunit.ReportFormatter.format(test_report)
+        assert test_report.run_count() == 2, f"should be 2, but was: {test_report.run_count()}"
+        assert test_report.failure_count() == 1, f"should be 1, but was: {test_report.failure_count()}"
+        formatted_report = xunit.DefaultFormatter.format(test_report)
         assert "MockTestCase" in formatted_report, "should contain 'MockTestCase'"
         assert "test_broken_method" in formatted_report, "should report failing test"
         assert "should_run_successful_test" in formatted_report, "should report successful test"
@@ -131,7 +133,7 @@ class TestReportTest(xunit.TestCase):
 suite = TestReportTest.create_test_suite()
 test_report = xunit.Report()
 suite.run(test_report)
-print(xunit.ReportFormatter.format(test_report))
+print(xunit.DefaultFormatter.format(test_report))
 
 class RunnerTest(xunit.TestCase):
     def should_setup_and_run_specified_test_suites(self):
@@ -145,4 +147,4 @@ class RunnerTest(xunit.TestCase):
 suite = RunnerTest.create_test_suite()
 test_report = xunit.Report()
 suite.run(test_report)
-print(xunit.ReportFormatter.format(test_report))
+print(xunit.DefaultFormatter.format(test_report))

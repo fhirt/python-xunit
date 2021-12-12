@@ -1,11 +1,13 @@
+from xunit.api import IFormatter, IReport, TestResult
 
-class Report:
+
+class Report(IReport):
     def __init__(self) -> None:
         self.__test_results: dict[str, list] = {}
         self.__failure_count = 0
         self.__run_count = 0
         
-    def record_test_result(self, test_result: "TestResult"):
+    def record_test_result(self, test_result: TestResult):
         self.__run_count += 1
         if test_result.test_case() not in self.__test_results:
             self.__test_results.update({test_result.test_case(): [test_result]})
@@ -23,33 +25,7 @@ class Report:
     def failure_count(self) -> int:
         return self.__failure_count
 
-    def summary(self) -> str:
-        return f"{self.run_count()} run, {self.failure_count()} failed"
-
-    
-class TestResult:
-    def __init__(self, test_case) -> None:
-        self.__test_case = test_case
-        self.__failed = False
-        self.__reason = None
-        
-    def record_failure(self, reason: str):
-        self.__reason = reason
-        self.__failed = True
-    
-    def test_case(self) -> str:
-        return type(self.__test_case).__name__
-        
-    def test_name(self) -> str:
-        return self.__test_case.name()
-    
-    def failed(self) -> bool:
-        return self.__failed
-    
-    def reason(self) -> str:
-        return self.__reason
-
-class ReportFormatter:
+class DefaultFormatter(IFormatter):
     CHECK_MARK = "\N{HEAVY CHECK MARK}"
     CROSS_MARK = "\N{HEAVY BALLOT X}"
     INDENT = "  "
@@ -57,7 +33,7 @@ class ReportFormatter:
     @classmethod
     def format(cls, test_report: Report) -> str:
         test_results = test_report.test_results()
-        full_report = f"{cls.CHECK_MARK if test_report.failure_count() == 0 else cls.CROSS_MARK} Test Report ({test_report.summary()}):\n"
+        full_report = f"{cls.CHECK_MARK if test_report.failure_count() == 0 else cls.CROSS_MARK} Test Report ({test_report.run_count()} run, {test_report.failure_count()} failed):\n"
         for test_case, test_results in test_results.items():
             full_report = full_report + f"{cls.__format_test_case(test_case, test_results)}"
             
