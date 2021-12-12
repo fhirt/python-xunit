@@ -1,7 +1,4 @@
-CHECK_MARK = "\N{HEAVY CHECK MARK}"
-CROSS_MARK = "\N{HEAVY BALLOT X}"
-
-class TestReporter:
+class TestReport:
     def __init__(self) -> None:
         self.__test_results = []
         self.__failure_count = 0
@@ -14,14 +11,12 @@ class TestReporter:
     def test_results(self) -> list:
         return self.__test_results.copy()
     
-    def full_report(self) -> str:
-        full_report = f"{CHECK_MARK if self.__failure_count == 0 else CROSS_MARK} TestReport ({self.summary()}):\n"
-        for result in self.__test_results:
-            full_report = full_report + f"{result}\n"
-        return full_report
+    def failure_count(self) -> int:
+        return self.__failure_count
 
     def summary(self) -> str:
         return f"{len(self.__test_results)} run, {self.__failure_count} failed"
+
     
 class TestResult:
     def __init__(self, name) -> None:
@@ -30,7 +25,6 @@ class TestResult:
         self.__reason = None
         
     def record_failure(self, reason: str):
-        print("debug", reason)
         self.__reason = reason
         self.__failed = True
         
@@ -42,15 +36,30 @@ class TestResult:
     
     def reason(self) -> str:
         return self.__reason
+
+class TestReportFormatter:
+    CHECK_MARK = "\N{HEAVY CHECK MARK}"
+    CROSS_MARK = "\N{HEAVY BALLOT X}"
+    INDENT = "  "
     
-    def __str__(self) -> str:
-        if self.failed():
-            return self.__format_failure()
+    @classmethod
+    def format(cls, test_report: TestReport) -> str:
+        full_report = f"{cls.CHECK_MARK if test_report.failure_count() == 0 else cls.CROSS_MARK} TestReport ({test_report.summary()}):\n"
+        for result in test_report.test_results():
+            full_report = full_report + f"{cls.__format_test_result(result)}\n"
+        return full_report
+    
+    @classmethod
+    def __format_test_result(cls, test_result: TestResult) -> str:
+        if test_result.failed():
+            return cls.__format_failure(test_result)
         else:
-            return self.__format_success()
+            return cls.__format_success(test_result)
+        
+    @classmethod
+    def __format_failure(cls, test_result: TestResult) -> str:
+        return f"{cls.INDENT}{cls.CROSS_MARK} {test_result.test_name()}\n{cls.INDENT*2}{test_result.reason()}"
     
-    def __format_failure(self) -> str:
-        return f"  {CROSS_MARK} {self.__test_name}\n\t{self.__reason}"
-    
-    def __format_success(self) -> str:
-        return f"  {CHECK_MARK} {self.__test_name}"
+    @classmethod
+    def __format_success(cls, test_result: TestResult) -> str:
+        return f"{cls.INDENT}{cls.CHECK_MARK} {test_result.test_name()}"
