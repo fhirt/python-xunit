@@ -30,7 +30,7 @@ class MockTestCaseWithSetupException(MockTestCase):
 class TestCaseTest(xunit.TestCase):
 
     def setup(self):
-        self.test_report = xunit.TestReport()
+        self.test_report = xunit.Report()
 
     def should_run_setup_test_case_and_teardown(self):
         test = MockTestCase("should_run_test_method")
@@ -56,14 +56,14 @@ class TestCaseTest(xunit.TestCase):
 
 
 suite = TestCaseTest.create_test_suite()
-test_report = xunit.TestReport()
+test_report = xunit.Report()
 test_report.test_suite("TestCaseTest")
 suite.run(test_report)
-print(xunit.TestReportFormatter.format(test_report))
+print(xunit.ReportFormatter.format(test_report))
 
 class TestSuiteTest(xunit.TestCase):
     def setup(self):
-        self.test_report = xunit.TestReport()
+        self.test_report = xunit.Report()
         
     def should_run_all_test_cases_in_test_suite(self):
         suite = xunit.TestSuite()
@@ -89,10 +89,10 @@ class TestSuiteTest(xunit.TestCase):
         assert failing_test.reason() != None, f"should not be None"
         
 suite = TestSuiteTest.create_test_suite()
-test_report = xunit.TestReport()
+test_report = xunit.Report()
 test_report.test_suite("TestSuiteTest")
 suite.run(test_report)
-print(xunit.TestReportFormatter.format(test_report))
+print(xunit.ReportFormatter.format(test_report))
 
 class TestReportTest(xunit.TestCase):
     def should_record_successful_test(self):
@@ -109,7 +109,7 @@ class TestReportTest(xunit.TestCase):
         assert test_result.reason() == "reason", "should record reason, but was:"
 
     def should_format_test_report(self):
-        test_report = xunit.TestReport()
+        test_report = xunit.Report()
         test_report.test_suite("TestSuiteName")
         test_result_one = xunit.TestResult("test_1")
         test_result_one.record_failure("failure reason")
@@ -119,17 +119,17 @@ class TestReportTest(xunit.TestCase):
         test_report.record_test_result(test_result_two)
 
         assert test_report.summary() == "2 run, 1 failed", f"should display summary, but was: '{test_report.summary()}'"
-        formatted_report = xunit.TestReportFormatter.format(test_report)
+        formatted_report = xunit.ReportFormatter.format(test_report)
         assert "TestSuiteName" in formatted_report, "should contain 'TestSuiteName'"
         assert "test_1" in formatted_report, "should report failing test"
         assert "test_2" in formatted_report, "should report successful test"
         assert "failure reason" in formatted_report, "should report failure reason"
 
 suite = TestReportTest.create_test_suite()
-test_report = xunit.TestReport()
+test_report = xunit.Report()
 test_report.test_suite("TestReportTest")
 suite.run(test_report)
-print(xunit.TestReportFormatter.format(test_report))
+print(xunit.ReportFormatter.format(test_report))
 
 class RunnerTest(xunit.TestCase):
     def should_setup_and_run_specified_test_suites(self):
@@ -141,7 +141,7 @@ class RunnerTest(xunit.TestCase):
         runner.run()
         
 suite = RunnerTest.create_test_suite()
-test_report = xunit.TestReport()
+test_report = xunit.Report()
 test_report.test_suite("RunnerTest")
 suite.run(test_report)
-print(xunit.TestReportFormatter.format(test_report))
+print(xunit.ReportFormatter.format(test_report))

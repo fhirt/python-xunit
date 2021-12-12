@@ -1,5 +1,5 @@
 import inspect
-from .test_report import TestReport, TestResult
+from xunit.report import Report, TestResult
 
 class TestCase:
     def __init__(self, name) -> None:
@@ -10,7 +10,7 @@ class TestCase:
         optional setup before each test method
         """       
 
-    def run(self, test_reporter: TestReport) -> None:
+    def run(self, test_reporter: Report) -> None:
         test_result = TestResult(self.name)
         try:
             self.setup()
@@ -48,6 +48,6 @@ class TestSuite(TestCase):
     def number_of_tests(self) -> int:
         return len(self.__tests)
         
-    def run(self, test_report: TestReport):
+    def run(self, test_report: Report):
         for test in self.__tests:
             test.run(test_report)

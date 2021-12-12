@@ -1,4 +1,4 @@
-class TestReport:
+class Report:
     def __init__(self) -> None:
         self.__test_results = []
         self.__failure_count = 0
@@ -47,13 +47,13 @@ class TestResult:
     def reason(self) -> str:
         return self.__reason
 
-class TestReportFormatter:
+class ReportFormatter:
     CHECK_MARK = "\N{HEAVY CHECK MARK}"
     CROSS_MARK = "\N{HEAVY BALLOT X}"
     INDENT = "  "
     
     @classmethod
-    def format(cls, test_report: TestReport) -> str:
+    def format(cls, test_report: Report) -> str:
         full_report = f"{cls.CHECK_MARK if test_report.failure_count() == 0 else cls.CROSS_MARK} {test_report.test_suite_name()} ({test_report.summary()}):\n"
         for result in test_report.test_results():
             full_report = full_report + f"{cls.__format_test_result(result)}\n"
