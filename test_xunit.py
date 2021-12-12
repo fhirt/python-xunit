@@ -55,11 +55,6 @@ class TestCaseTest(xunit.TestCase):
         assert test.log == "setup tear_down", f"should run tear_down: {test.log}"
 
 
-suite = TestCaseTest.create_test_suite()
-test_report = xunit.Report()
-suite.run(test_report)
-print(xunit.DefaultFormatter.format(test_report))
-
 class TestSuiteTest(xunit.TestCase):
     def setup(self):
         self.test_report = xunit.Report()
@@ -87,11 +82,7 @@ class TestSuiteTest(xunit.TestCase):
             if test_result.failed():
                 failing_test = test_result
         assert failing_test.reason() != None, f"should not be None"
-        
-suite = TestSuiteTest.create_test_suite()
-test_report = xunit.Report()
-suite.run(test_report)
-print(xunit.DefaultFormatter.format(test_report))
+
 
 class TestReportTest(xunit.TestCase):   
     
@@ -130,10 +121,6 @@ class TestReportTest(xunit.TestCase):
         assert "should_run_successful_test" in formatted_report, "should report successful test"
         assert "failure reason" in formatted_report, "should report failure reason"
 
-suite = TestReportTest.create_test_suite()
-test_report = xunit.Report()
-suite.run(test_report)
-print(xunit.DefaultFormatter.format(test_report))
 
 class RunnerTest(xunit.TestCase):
     def should_setup_and_run_specified_test_suites(self):
@@ -142,9 +129,16 @@ class RunnerTest(xunit.TestCase):
         
         runner = xunit.Runner()
         runner.add(mock_suite_one, mock_suite_two)
-        runner.run()
+        formatted_report = runner.run()
         
-suite = RunnerTest.create_test_suite()
-test_report = xunit.Report()
-suite.run(test_report)
-print(xunit.DefaultFormatter.format(test_report))
+        assert runner.run_count() == 4, f"should be 4, but was {runner.run_count()}"
+        assert runner.failure_count() == 3, f"should be 3, but was {runner.failure_count()}"
+        
+        assert "MockTestCase" in formatted_report
+        assert "MockTestCaseWithSetupException" in formatted_report
+
+
+runner = xunit.Runner()
+runner.add(TestCaseTest.create_test_suite(), TestSuiteTest.create_test_suite(), TestReportTest.create_test_suite(), RunnerTest.create_test_suite())
+formatted_report = runner.run()
+print(formatted_report)

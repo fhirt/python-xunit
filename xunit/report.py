@@ -26,9 +26,13 @@ class Report(IReport):
         return self.__failure_count
 
 class DefaultFormatter(IFormatter):
-    CHECK_MARK = "\N{HEAVY CHECK MARK}"
-    CROSS_MARK = "\N{HEAVY BALLOT X}"
-    INDENT = "  "
+    GREEN = "\033[92m"
+    RED = "\033[91m"
+    RESET = "\033[0m"
+    
+    CHECK_MARK = f"{GREEN}\N{HEAVY CHECK MARK}{RESET}"
+    CROSS_MARK = f"{RED}\N{HEAVY BALLOT X}{RESET}"
+    INDENT = "    "
     
     @classmethod
     def format(cls, test_report: Report) -> str:
@@ -48,7 +52,7 @@ class DefaultFormatter(IFormatter):
                 failures += 1
             test_case_report = test_case_report + f"{cls.INDENT}{cls.__format_test_result(result)}\n"
 
-        return f"{cls.INDENT}{cls.CROSS_MARK if failures > 0 else cls.CHECK_MARK} {test_case} ({len(test_results)} run, {failures} failed):\n" + test_case_report
+        return f"{cls.INDENT}{cls.CROSS_MARK if failures > 0 else cls.CHECK_MARK} {test_case} ({len(test_results)} run, {failures} failed):\n" + test_case_report + "\n"
     
     @classmethod
     def __format_test_result(cls, test_result: TestResult) -> str:
@@ -59,7 +63,7 @@ class DefaultFormatter(IFormatter):
         
     @classmethod
     def __format_failure(cls, test_result: TestResult) -> str:
-        return f"{cls.INDENT}{cls.CROSS_MARK} {test_result.test_name()}\n{cls.INDENT*2}{test_result.reason()}"
+        return f"{cls.INDENT}{cls.CROSS_MARK} {test_result.test_name()}\n{cls.INDENT*3}{test_result.reason()}"
     
     @classmethod
     def __format_success(cls, test_result: TestResult) -> str:
