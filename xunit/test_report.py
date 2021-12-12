@@ -2,14 +2,24 @@ class TestReport:
     def __init__(self) -> None:
         self.__test_results = []
         self.__failure_count = 0
+        self.__test_suite_name = "TestReport"
         
     def record_test_result(self, test_result: "TestResult"):
         self.__test_results.append(test_result)
         if test_result.failed():
             self.__failure_count += 1     
     
+    def test_suite(self, name: str):
+        self.__test_suite_name = name
+        
+    def test_suite_name(self):
+        return self.__test_suite_name
+    
     def test_results(self) -> list:
         return self.__test_results.copy()
+    
+    def run_count(self) -> int:
+        return len(self.__test_results)
     
     def failure_count(self) -> int:
         return self.__failure_count
@@ -44,7 +54,7 @@ class TestReportFormatter:
     
     @classmethod
     def format(cls, test_report: TestReport) -> str:
-        full_report = f"{cls.CHECK_MARK if test_report.failure_count() == 0 else cls.CROSS_MARK} TestReport ({test_report.summary()}):\n"
+        full_report = f"{cls.CHECK_MARK if test_report.failure_count() == 0 else cls.CROSS_MARK} {test_report.test_suite_name()} ({test_report.summary()}):\n"
         for result in test_report.test_results():
             full_report = full_report + f"{cls.__format_test_result(result)}\n"
         return full_report
