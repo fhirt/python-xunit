@@ -30,8 +30,8 @@ class DefaultFormatter(IFormatter):
     RED = "\033[91m"
     RESET = "\033[0m"
     
-    CHECK_MARK = f"{GREEN}\N{HEAVY CHECK MARK}{RESET}"
-    CROSS_MARK = f"{RED}\N{HEAVY BALLOT X}{RESET}"
+    CHECK_MARK = f"{RESET}{GREEN}\N{HEAVY CHECK MARK}"
+    CROSS_MARK = f"{RESET}{RED}\N{HEAVY BALLOT X}"
     INDENT = "    "
     
     @classmethod
@@ -41,7 +41,7 @@ class DefaultFormatter(IFormatter):
         for test_case, test_results in test_results.items():
             full_report = full_report + f"{cls.__format_test_case(test_case, test_results)}"
             
-        return full_report
+        return full_report + cls.RESET
     
     @classmethod
     def __format_test_case(cls, test_case: str, test_results: list) -> str:
