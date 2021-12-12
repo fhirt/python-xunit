@@ -1,5 +1,5 @@
 import inspect
-from .test_report import TestReporter
+from .test_report import TestReporter, TestResult
 
 class TestCase:
     def __init__(self, name) -> None:
@@ -10,18 +10,19 @@ class TestCase:
         optional setup before each test method
         """       
 
-    def run(self, test_report: TestReporter) -> None:
-        test_report.test_started()
+    def run(self, test_reporter: TestReporter) -> None:
+        test_result = TestResult(self.name)
         try:
             self.setup()
             try:
                 method = getattr(self, self.name)
                 method()
             except AssertionError as ae:
-                test_report.test_failed(self.name, ae)
+                test_result.record_failure(ae)
         except Exception as e:
-            test_report.test_failed(self.name, e)
+            test_result.record_failure(e)
         finally:
+            test_reporter.record_test_result(test_result)
             self.tear_down()        
 
     def tear_down(self):
