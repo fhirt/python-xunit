@@ -1,6 +1,6 @@
 from xunit.api import IFormatter, IReport
 from xunit.report import DefaultFormatter, Report
-from xunit.test_case import TestSuite
+from xunit.test_case import TestCase, TestSuite
 
 
 class Runner():
@@ -9,9 +9,9 @@ class Runner():
         self.__report: IReport = Report()
         self.__test_suites: list[TestSuite] = []
         
-    def add(self, *args) -> None:
-        for suite in args:
-            self.__test_suites.append(suite)
+    def add(self, *args: TestCase) -> None:
+        for test_case in args:
+            self.__test_suites.append(test_case.create_test_suite())
 
     def run(self) -> str:
         for test_suite in self.__test_suites:
